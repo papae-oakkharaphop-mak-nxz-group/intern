@@ -1,11 +1,14 @@
 package com.nxzgroup.intern.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nxzgroup.intern.service.StudentService;
 import com.nxzgroup.intern.model.Student;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/students")
 public class StudentController {
@@ -32,6 +35,26 @@ public class StudentController {
         return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(students);
+    }
+    @GetMapping("/page")
+    public ResponseEntity<Map<String, Object>> getStudentsByPage(@RequestParam(defaultValue = "1") int page) {
+        int pageSize = 10; // Number of students to return per page
+        List<Student> students = studentService.retrieveStudent();
+        int totalStudents = students.size();
+        int totalPages = (int) Math.ceil((double) totalStudents / pageSize);
+        if (page >= totalPages) {
+            return ResponseEntity.notFound().build();
+        }
+        int startIndex = page * pageSize - 10;
+        int endIndex = Math.min(startIndex + pageSize, totalStudents);
+        List<Student> pageStudents = students.subList(startIndex, endIndex);
+        if (pageStudents.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("students", pageStudents);
+        response.put("totalPages", totalPages);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

@@ -1,5 +1,6 @@
 package com.nxzgroup.intern.controller;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ import com.nxzgroup.intern.model.Student;
 public class StudentController {
     @Autowired
     StudentService studentService;
-
+/* 
     @GetMapping("/")
     public ResponseEntity<List<Student>> getAllStudents() {
         List<Student> students = studentService.retrieveStudent();
@@ -56,14 +57,85 @@ public class StudentController {
         response.put("totalPages", totalPages);
         return ResponseEntity.ok(response);
     }
+*/
+@GetMapping("/")
+public ResponseEntity<Object> getAllStudents(
+    @RequestParam(name = "page", required = false) Integer page,
+    @RequestParam(name = "name", required = false) String name,
+    @RequestParam(name = "lastname", required = false) String lastname,
+    @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
+    @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder
+    ) {
 
+    List<Student> students;
+    int pageSize = 10;
+
+    if (name != null && !name.isBlank() && lastname != null && !lastname.isBlank()) {
+        students = studentService.retrieveStudentByNameAndLastName(name, lastname);
+    } else if (name != null && !name.isBlank()) {
+        students = studentService.retrieveStudentByName(name);
+    } else if (lastname != null && !lastname.isBlank()) {
+        students = studentService.retrieveStudentByLastName(lastname);
+    } else {
+        students = studentService.retrieveStudent();
+    }
+
+    if (students.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+
+    int totalStudents = students.size();
+
+    if(sortBy != null && !sortBy.isBlank() && (sortOrder.equalsIgnoreCase("asc") || sortOrder.equalsIgnoreCase("desc"))){
+        if(sortOrder.equalsIgnoreCase("asc")){
+            if(sortBy.equalsIgnoreCase("id")){
+                students.sort(Comparator.comparing(Student::getId));
+            }
+        }else if(sortOrder.equalsIgnoreCase("desc")){
+            if(sortBy.equalsIgnoreCase("id")){
+                students.sort(Comparator.comparing(Student::getId).reversed());
+            }
+        }
+    } else {
+        return ResponseEntity.badRequest().build();
+    }
+
+    if (students.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+
+    int totalPages = (int) Math.ceil((double) totalStudents / pageSize);
+
+    if (name != null && !name.isBlank() && lastname != null && !lastname.isBlank()) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("students", students.subList(0, Math.min(pageSize, totalStudents)));
+        response.put("totalPages", totalPages);
+        return ResponseEntity.ok(response);
+    }
+
+    if (page != null) {
+        if (page < 1 || page > totalPages) {
+            return ResponseEntity.badRequest().build();
+        }
+        int startIndex = (page - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, totalStudents);
+        students = students.subList(startIndex, endIndex);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("students", students);
+        response.put("totalPages", totalPages);
+        return ResponseEntity.ok(response);
+    } else {
+        return ResponseEntity.ok(students.subList(0, Math.min(pageSize, totalStudents)));
+    }
+}
     @GetMapping("/{id}")
     public ResponseEntity<?> getStudent(@PathVariable Long id) {
-        Optional<Student> customer = studentService.retrieveStudent(id);
-        if(!customer.isPresent()) {
+        Optional<Student> studnet = studentService.retrieveStudent(id);
+        if(!studnet.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(customer);
+        return ResponseEntity.ok(studnet);
     }
 
     @GetMapping(params = "name")
@@ -73,14 +145,14 @@ public class StudentController {
 
     @PostMapping()
     public ResponseEntity<?> postStudent(@RequestBody Student body) {
-        Student customer = studentService.createStudent(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
+        Student studnet = studentService.createStudent(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(studnet);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> puStudent(@PathVariable Long id, @RequestBody Student body) {
-        Optional<Student> customer = studentService.updateStudent(id, body);
-        if(!customer.isPresent()) {
+        Optional<Student> studnet = studentService.updateStudent(id, body);
+        if(!studnet.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().build();

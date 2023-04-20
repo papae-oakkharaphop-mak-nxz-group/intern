@@ -53,4 +53,21 @@ public class StudentService {
             return false;
         }
     }
+
+    public long countStudents() {
+        return studentRepository.count();
+    }
+
+    public List<Student> retrieveStudentByName(String name) {
+        return studentRepository.findByFirstNameContainingIgnoreCase(name);
+    }
+    
+    public List<Student> retrieveStudentByLastName(String lastName) {
+        return studentRepository.findByLastNameContainingIgnoreCase(lastName);
+    }
+
+    public List<Student> retrieveStudentByNameAndLastName(String name, String lastName) {
+        return studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName);
+    }
 }
+

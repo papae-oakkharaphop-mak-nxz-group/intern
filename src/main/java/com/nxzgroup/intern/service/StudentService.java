@@ -38,60 +38,66 @@ public class StudentService {
         }
     }
 
-    public ResponseEntity<Object> getStudent(Long id){
+    public ResponseEntity<Object> getStudent(Long id) {
         Optional<Student> student = retrieveStudent(id);
         if (!student.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(student);
     }
-    public ResponseEntity<Object> getAllStudents(Integer pageSize, Integer page, String name, String lastName, String sortBy, String sortOrder) {
+
+    public Pageable getPage(Integer page, Integer pageSize, String sortOrder, String sortBy) {
         Pageable pageable;
         if (page == null) {
-            Integer unknown = 100000;
-            pageable = PageRequest.of(0, unknown, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
+            Integer unknownPageSize = 100000;
+            pageable = PageRequest.of(0, unknownPageSize, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
         } else {
             page = page - 1;
             pageable = PageRequest.of(page, pageSize, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
         }
-
-        StudentFilter filter = StudentFilter.fromValues(name, lastName);
-
-        Page<Student> studentPage;
-
-        switch (filter) {
-            case BY_NAME_AND_LASTNAME:
-                studentPage = studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName, pageable);
-                break;
-            case BY_NAME:
-                studentPage = studentRepository.findByFirstNameContainingIgnoreCase(name, pageable);
-                break;
-            case BY_LASTNAME:
-                studentPage = studentRepository.findByLastNameContainingIgnoreCase(lastName, pageable);
-                break;
-            case ALL:
-                studentPage = studentRepository.findAll(pageable);
-                break;
-            default:
-                return ResponseEntity.badRequest().build();
-        }
-
-        if (studentPage.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        int totalStudents = (int) studentPage.getTotalElements();
-        int totalPages = studentPage.getTotalPages();
-
-        Response response = new Response();
-        response.setStudent(studentPage.getContent());
-        response.setTotalPage(totalPages);
-        response.setTotalStudent(totalStudents);
-        return ResponseEntity.ok(response);
+        return pageable;
     }
 
+    public Response getAllStudents(Integer pageSize, Integer page, String name, String lastName, String sortBy, String sortOrder) throws Exception {
+        try {
+            StudentFilter filter = StudentFilter.fromValues(name, lastName);
+            Pageable pageable = getPage(page, pageSize, sortOrder, sortBy);
+            Page<Student> studentPage;
+            Response response = new Response();
+
+            switch (filter) {
+                case BY_NAME_AND_LASTNAME:
+                    studentPage = studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName, pageable);
+                    break;
+                case BY_NAME:
+                    studentPage = studentRepository.findByFirstNameContainingIgnoreCase(name, pageable);
+                    break;
+                case BY_LASTNAME:
+                    studentPage = studentRepository.findByLastNameContainingIgnoreCase(lastName, pageable);
+                    break;
+                case ALL:
+                    studentPage = studentRepository.findAll(pageable);
+                    break;
+                default:
+                    throw new Exception("Bad Request");
+            }
+
+            if (studentPage.isEmpty()) {
+                throw new Exception("No Data");
+            }
+
+            int totalStudents = (int) studentPage.getTotalElements();
+            int totalPages = studentPage.getTotalPages();
 
 
+            response.setTotalPage(totalPages);
+            response.setTotalStudent(totalStudents);
+            response.setStudent(studentPage.getContent());
+            return response;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage(), e.getCause());
+        }
+    }
 
 
     @Autowired
@@ -100,25 +106,41 @@ public class StudentService {
     }
 
     public List<Student> retrieveStudent() {
-        return (List<Student>) studentRepository.findAll();
+        try {
+            return (List<Student>) studentRepository.findAll();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Optional<Student> retrieveStudent(Long id) {
-        return studentRepository.findById(id);
+        try {
+            return studentRepository.findById(id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Student createStudent(Student student) {
-        student.setId(null);
-        return studentRepository.save(student);
+        try {
+            student.setId(null);
+            return studentRepository.save(student);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Optional<Student> updateStudent(Long id, Student student) {
-        Optional<Student> studentOptional = studentRepository.findById(id);
-        if(!studentOptional.isPresent()) {
-            return studentOptional;
+        try {
+            Optional<Student> studentOptional = studentRepository.findById(id);
+            if (!studentOptional.isPresent()) {
+                return studentOptional;
+            }
+            student.setId(id);
+            return Optional.of(studentRepository.save(student));
+        } catch (Exception e) {
+            return null;
         }
-        student.setId(id);
-        return Optional.of(studentRepository.save(student));
     }
 
     public boolean deleteStudent(Long id) {
@@ -128,22 +150,6 @@ public class StudentService {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
-    }
-
-    public long countStudents() {
-        return studentRepository.count();
-    }
-
-    public List<Student> retrieveStudentByName(String name, Sort sort) {
-        return studentRepository.findByFirstNameContainingIgnoreCase(name,sort);
-    }
-    
-    public List<Student> retrieveStudentByLastName(String lastName, Sort sort) {
-        return studentRepository.findByLastNameContainingIgnoreCase(lastName,sort);
-    }
-
-    public List<Student> retrieveStudentByNameAndLastName(String name, String lastName, Sort sort) {
-        return studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName,sort);
     }
 }
 

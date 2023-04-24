@@ -45,10 +45,11 @@ public class StudentController {
             @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder
     ) {
         try {
-            return studentService.getAllStudents(pageSize,page, name, lastname, sortBy, sortOrder);
+            return ResponseEntity.ok(studentService.getAllStudents(pageSize,page, name, lastname, sortBy, sortOrder));
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
         }
     }
 
@@ -57,17 +58,9 @@ public class StudentController {
         try {
             return studentService.getStudent(id);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
         }
     }
-
-/*    @GetMapping(params = "name")
-    public List<Student> getStudent(@RequestParam(value = "name") String name) {
-        return studentService.retrieveStudent(name);
-    }*/
-
-    //@PostMapping()
     @RequestMapping(value = "/", produces = "application/json", method = RequestMethod.POST)
     public ResponseEntity<?> postStudent(@RequestBody Student body) {
 
@@ -75,27 +68,42 @@ public class StudentController {
             Student student = studentService.createStudent(body);
             return ResponseEntity.status(HttpStatus.CREATED).body(student);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.OK).body("Sorry");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
         }
 
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> puStudent(@PathVariable Long id, @RequestBody Student body) {
-        Optional<Student> student = studentService.updateStudent(id, body);
-        if (!student.isPresent()) {
-            return ResponseEntity.notFound().build();
+
+        try {
+            Optional<Student> student = studentService.updateStudent(id, body);
+            if (!student.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok().build();
+        catch (Exception e)
+        {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
+        }
+
+
     }
 
     @RequestMapping(value = "/{id}", produces = "application/json", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
-        if (!studentService.deleteStudent(id)) {
-            return ResponseEntity.notFound().build();
+        try {
+            if (!studentService.deleteStudent(id)) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok().build();
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
+        }
+
+
     }
 
 }

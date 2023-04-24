@@ -12,4 +12,5 @@ import java.util.List;
 public class Response {
     private List<Student> student;
     private Integer totalPage;
+    private Integer totalStudent;
 }

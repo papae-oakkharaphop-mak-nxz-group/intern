@@ -5,6 +5,9 @@ import java.util.*;
 import com.nxzgroup.intern.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -42,47 +45,52 @@ public class StudentService {
         }
         return ResponseEntity.ok(student);
     }
-    public ResponseEntity<Object> getAllStudents(Integer page, String name, String lastName, String sortBy, String sortOrder) {
-        int pageSize = 10;
-        Sort sort = Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
-        List<Student> students = null;
-        StudentFilter filter = StudentFilter.fromValues(name, lastName);
-        switch (filter) {
-            case BY_NAME_AND_LASTNAME:
-                students = studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName, sort);
-                break;
-            case BY_NAME:
-                students = studentRepository.findByFirstNameContainingIgnoreCase(name, sort);
-                break;
-            case BY_LASTNAME:
-                students = studentRepository.findByLastNameContainingIgnoreCase(lastName, sort);
-                break;
-            case ALL:
-                students = (List<Student>) studentRepository.findAll(sort);
-                break;
+    public ResponseEntity<Object> getAllStudents(Integer pageSize, Integer page, String name, String lastName, String sortBy, String sortOrder) {
+        Pageable pageable;
+        if (page == null) {
+            Integer unknown = 100000;
+            pageable = PageRequest.of(0, unknown, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
+        } else {
+            page = page - 1;
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
         }
 
-        if (students.isEmpty()) {
+        StudentFilter filter = StudentFilter.fromValues(name, lastName);
+
+        Page<Student> studentPage;
+
+        switch (filter) {
+            case BY_NAME_AND_LASTNAME:
+                studentPage = studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName, pageable);
+                break;
+            case BY_NAME:
+                studentPage = studentRepository.findByFirstNameContainingIgnoreCase(name, pageable);
+                break;
+            case BY_LASTNAME:
+                studentPage = studentRepository.findByLastNameContainingIgnoreCase(lastName, pageable);
+                break;
+            case ALL:
+                studentPage = studentRepository.findAll(pageable);
+                break;
+            default:
+                return ResponseEntity.badRequest().build();
+        }
+
+        if (studentPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        int totalStudents = students.size();
-        int totalPages = (int) Math.ceil((double) totalStudents / pageSize);
-
-        if (page != null) {
-            if (page < 1 || page > totalPages) {
-                return ResponseEntity.badRequest().build();
-            }
-            int startIndex = (page - 1) * pageSize;
-            int endIndex = Math.min(startIndex + pageSize, totalStudents);
-            students = students.subList(startIndex, endIndex);
-        }
+        int totalStudents = (int) studentPage.getTotalElements();
+        int totalPages = studentPage.getTotalPages();
 
         Response response = new Response();
-        response.setStudent(students);
+        response.setStudent(studentPage.getContent());
         response.setTotalPage(totalPages);
+        response.setTotalStudent(totalStudents);
         return ResponseEntity.ok(response);
     }
+
+
 
 
 

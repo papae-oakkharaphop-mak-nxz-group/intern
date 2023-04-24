@@ -38,13 +38,14 @@ public class StudentController {
     @GetMapping("/")
     public ResponseEntity<Object> getAllStudents(
             @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "lastname", required = false) String lastname,
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder
     ) {
         try {
-            return studentService.getAllStudents(page, name, lastname, sortBy, sortOrder);
+            return studentService.getAllStudents(pageSize,page, name, lastname, sortBy, sortOrder);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();

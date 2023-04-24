@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.data.domain.Sort.Direction;
+
 
 import com.nxzgroup.intern.service.StudentService;
 import com.nxzgroup.intern.model.Student;
@@ -72,11 +76,11 @@ public ResponseEntity<Object> getAllStudents(
     int pageSize = 10;
 
     if (name != null && !name.isBlank() && lastname != null && !lastname.isBlank()) {
-        students = studentService.retrieveStudentByNameAndLastName(name, lastname);
+        students = studentService.retrieveStudentByNameAndLastName(name, lastname, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC, sortBy));
     } else if (name != null && !name.isBlank()) {
-        students = studentService.retrieveStudentByName(name);
+        students = studentService.retrieveStudentByName(name, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC, sortBy));
     } else if (lastname != null && !lastname.isBlank()) {
-        students = studentService.retrieveStudentByLastName(lastname);
+        students = studentService.retrieveStudentByLastName(lastname, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Direction.ASC : Direction.DESC, sortBy));
     } else {
         students = studentService.retrieveStudent();
     }
@@ -132,11 +136,11 @@ public ResponseEntity<Object> getAllStudents(
 }
     @GetMapping("/{id}")
     public ResponseEntity<?> getStudent(@PathVariable Long id) {
-        Optional<Student> studnet = studentService.retrieveStudent(id);
-        if(!studnet.isPresent()) {
+        Optional<Student> student = studentService.retrieveStudent(id);
+        if(!student.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(studnet);
+        return ResponseEntity.ok(student);
     }
 
     @GetMapping(params = "name")
@@ -147,14 +151,14 @@ public ResponseEntity<Object> getAllStudents(
     //@PostMapping()
     @RequestMapping(value = "/", produces = "application/json", method=RequestMethod.POST)
     public ResponseEntity<?> postStudent(@RequestBody Student body) {
-        Student studnet = studentService.createStudent(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(studnet);
+        Student student = studentService.createStudent(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(student);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> puStudent(@PathVariable Long id, @RequestBody Student body) {
-        Optional<Student> studnet = studentService.updateStudent(id, body);
-        if(!studnet.isPresent()) {
+        Optional<Student> student = studentService.updateStudent(id, body);
+        if(!student.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().build();

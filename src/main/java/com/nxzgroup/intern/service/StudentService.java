@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.nxzgroup.intern.repository.StudentRepository;
@@ -58,16 +59,16 @@ public class StudentService {
         return studentRepository.count();
     }
 
-    public List<Student> retrieveStudentByName(String name) {
-        return studentRepository.findByFirstNameContainingIgnoreCase(name);
+    public List<Student> retrieveStudentByName(String name, Sort sort) {
+        return studentRepository.findByFirstNameContainingIgnoreCase(name,sort);
     }
     
-    public List<Student> retrieveStudentByLastName(String lastName) {
-        return studentRepository.findByLastNameContainingIgnoreCase(lastName);
+    public List<Student> retrieveStudentByLastName(String lastName, Sort sort) {
+        return studentRepository.findByLastNameContainingIgnoreCase(lastName,sort);
     }
 
-    public List<Student> retrieveStudentByNameAndLastName(String name, String lastName) {
-        return studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName);
+    public List<Student> retrieveStudentByNameAndLastName(String name, String lastName, Sort sort) {
+        return studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName,sort);
     }
 }
 

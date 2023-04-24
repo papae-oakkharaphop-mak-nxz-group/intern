@@ -35,19 +35,6 @@ public class StudentService {
         }
     }
 
-//    public List<Student> sortStudents(List<Student> students, String sortBy, String sortOrder) {
-//        if (sortBy != null && !sortBy.isBlank() && ("asc".equalsIgnoreCase(sortOrder) || "desc".equalsIgnoreCase(sortOrder))) {
-//            Comparator<Student> comparator = Comparator.comparing(Student::getId);
-//            if ("desc".equalsIgnoreCase(sortOrder)) {
-//                comparator = comparator.reversed();
-//            }
-//            students.sort(comparator);
-//            return students;
-//        } else {
-//            return null;
-//        }
-//    }
-
     public ResponseEntity<Object> getStudent(Long id){
         Optional<Student> student = retrieveStudent(id);
         if (!student.isPresent()) {
@@ -55,18 +42,11 @@ public class StudentService {
         }
         return ResponseEntity.ok(student);
     }
-    public ResponseEntity<Object> getAllStudents(
-            Integer page, String name, String lastName, String sortBy, String sortOrder) {
-
+    public ResponseEntity<Object> getAllStudents(Integer page, String name, String lastName, String sortBy, String sortOrder) {
         int pageSize = 10;
-        Sort sort = Sort.by(
-                sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy
-        );
-
+        Sort sort = Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
         List<Student> students = null;
-
         StudentFilter filter = StudentFilter.fromValues(name, lastName);
-
         switch (filter) {
             case BY_NAME_AND_LASTNAME:
                 students = studentRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(name, lastName, sort);
@@ -87,7 +67,6 @@ public class StudentService {
         }
 
         int totalStudents = students.size();
-//        students = sortStudents(students, sortBy, sortOrder);
         int totalPages = (int) Math.ceil((double) totalStudents / pageSize);
 
         if (page != null) {

@@ -69,8 +69,15 @@ public class StudentController {
     //@PostMapping()
     @RequestMapping(value = "/", produces = "application/json", method = RequestMethod.POST)
     public ResponseEntity<?> postStudent(@RequestBody Student body) {
-        Student student = studentService.createStudent(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(student);
+
+        try {
+            Student student = studentService.createStudent(body);
+            return ResponseEntity.status(HttpStatus.CREATED).body(student);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.OK).body("Sorry");
+        }
+
     }
 
     @PutMapping("/{id}")

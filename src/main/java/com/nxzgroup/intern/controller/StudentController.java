@@ -37,6 +37,7 @@ public class StudentController {
 
     @GetMapping("/")
     public ResponseEntity<Object> getAllStudents(
+            //req param => model ?
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "name", required = false) String name,

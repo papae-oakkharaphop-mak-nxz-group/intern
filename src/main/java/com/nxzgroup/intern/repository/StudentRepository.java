@@ -4,8 +4,10 @@ import java.util.List;
 import com.nxzgroup.intern.model.Student;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.repository.CrudRepository;
 
 public interface StudentRepository extends CrudRepository<Student, Long> {
@@ -13,7 +15,7 @@ public interface StudentRepository extends CrudRepository<Student, Long> {
     List<Student> findByLastNameContainingIgnoreCase(String lastName, Sort sort);
     List<Student> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String firstName, String lastName, Sort sort);
 
-    List<Student>  findAll(Sort id);
+    List<Student>  findAll(Class<PageRequest> class1);
 
     Page<Student> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String firstName, String lastName, Pageable pageable);
 
@@ -21,6 +23,4 @@ public interface StudentRepository extends CrudRepository<Student, Long> {
 
     Page<Student> findByLastNameContainingIgnoreCase(String lastName, Pageable pageable);
     Page<Student> findAll(Pageable pageable);
-
-
 }

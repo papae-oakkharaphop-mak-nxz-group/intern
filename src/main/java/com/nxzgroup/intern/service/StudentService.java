@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -48,11 +49,13 @@ public class StudentService {
 
     public Pageable getPage(Integer page, Integer pageSize, String sortOrder, String sortBy) {
         Pageable pageable;
+        //short if possible ?
         if (page == null) {
             Integer unknownPageSize = 100000;
             pageable = PageRequest.of(0, unknownPageSize, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
         } else {
             page = page - 1;
+            //sortby create fx to return
             pageable = PageRequest.of(page, pageSize, Sort.by(sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
         }
         return pageable;
@@ -89,7 +92,7 @@ public class StudentService {
             int totalStudents = (int) studentPage.getTotalElements();
             int totalPages = studentPage.getTotalPages();
 
-
+            response.setStatus(HttpStatus.OK);
             response.setTotalPage(totalPages);
             response.setTotalStudent(totalStudents);
             response.setStudent(studentPage.getContent());
@@ -150,6 +153,10 @@ public class StudentService {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    public List<Student> findAll() {
+        return null;
     }
 }
 

@@ -15,8 +15,6 @@ import lombok.Setter;
 @Table(name = "students")
 public class Student {
     public Student(){}
-    public Student(long l, String string, String string2) {
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

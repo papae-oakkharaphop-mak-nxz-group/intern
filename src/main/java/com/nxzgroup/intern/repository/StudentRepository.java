@@ -15,7 +15,7 @@ public interface StudentRepository extends CrudRepository<Student, Long> {
     List<Student> findByLastNameContainingIgnoreCase(String lastName, Sort sort);
     List<Student> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String firstName, String lastName, Sort sort);
 
-    List<Student>  findAll(Class<PageRequest> class1);
+    //List<Student>  findAll(Class<PageRequest> class1);
 
     Page<Student> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String firstName, String lastName, Pageable pageable);
 

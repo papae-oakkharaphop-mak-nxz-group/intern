@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.nxzgroup.intern.repository.StudentRepository;
 import com.nxzgroup.intern.model.Student;
@@ -127,9 +128,13 @@ public class StudentService {
     public Student createStudent(Student student) {
         try {
             student.setId(null);
+            if(student.getFirstName() == null || student.getLastName() == null || student.getBirthDate() == null)
+            {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required fields are missing");
+            }
             return studentRepository.save(student);
         } catch (Exception e) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create student", e);
         }
     }
 

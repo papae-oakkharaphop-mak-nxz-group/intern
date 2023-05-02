@@ -12,6 +12,8 @@ import lombok.Setter;
 
 @Data
 @Entity
+@Getter
+@Setter
 @Table(name = "students")
 public class Student {
     public Student(){}

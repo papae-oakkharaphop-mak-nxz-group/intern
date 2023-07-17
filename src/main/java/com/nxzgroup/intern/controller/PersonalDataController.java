@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 @RestController
 @RequestMapping("/students")
-public class PersonalDataCintroller {
+public class PersonalDataController {
 
 }

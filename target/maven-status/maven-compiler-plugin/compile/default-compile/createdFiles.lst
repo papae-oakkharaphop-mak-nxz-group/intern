@@ -2,6 +2,7 @@ com/nxzgroup/intern/controller/StudentController.class
 com/nxzgroup/intern/repository/StudentRepository.class
 com/nxzgroup/intern/config/MyConfig.class
 com/nxzgroup/intern/service/StudentService$1.class
+com/nxzgroup/intern/controller/PersonalDataController.class
 com/nxzgroup/intern/model/Student.class
 com/nxzgroup/intern/service/StudentService.class
 com/nxzgroup/intern/InternApplication.class
